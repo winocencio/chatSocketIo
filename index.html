@@ -22,20 +22,35 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/libs/jquery-1.11.1.js"></script>
     <script>
-        var socket = io();
 
-        socket.on('userConnect', function(data){
-            $('#messages').append($('<li>').text( "Usuario Conectado: " + data.userId));
+        var escreverMensagem = function(msg){
+            $('#messages').append($('<li>').text(msg));
+        };
+
+        var userName = null;
+        while(!userName){
+            userName = prompt("Preencha seu nome:");
+            userName = userName != null ? userName.trim() : "";
+        }
+
+        /*Coneção Socket Server*/
+        var socketClient = io({ query: { name: userName } });
+        escreverMensagem("Conectado com o nome: " + userName);
+
+        /*Criando Eventos*/
+        
+        socketClient.on('userConnect', function(user){
+            escreverMensagem("Usuario Conectado: " + user.name);
         });
 
         $('#btn').on('click', function(){
-            var message = $('#m').val();
-            socket.emit('message', message);
+            var data = {userName , message : $('#m').val()};
+            socketClient.emit('envMessage', data);
             $('#m').val('');
         });
 
-        socket.on('envMessage', function(data){
-            $('#messages').append($('<li>').text(data.userId + ': ' + data.msg));
+        socketClient.on('envMessage', function(data){
+            escreverMensagem(data.user.name + ': ' + data.message);
         });
 
     </script>
