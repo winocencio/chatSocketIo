@@ -4,6 +4,8 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var db = require('./database.js');
 
+const PORT = process.env.PORT || 3000;
+
 app.use(express.static(__dirname + '/static'));
 
 app.get('/chat', function(req, res){
@@ -50,6 +52,6 @@ io.on('connection', function(client){
     });
 });
 
-http.listen(80, function(){
-    console.log('listening on *:80');
+http.listen(PORT, function(){
+    console.log('listening on *:80',"color: green");
 });
