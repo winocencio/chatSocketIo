@@ -4,6 +4,10 @@
     "description": "Hello World com Socket.io",
     "dependencies": {
         "express": "^4.17.1",
+        "lokijs": "^1.5.11",
         "socket.io": "^2.3.0"
+    },
+    "scripts": {
+        "start": "node server.js"
     }
 }
