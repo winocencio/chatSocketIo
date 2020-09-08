@@ -53,5 +53,5 @@ io.on('connection', function(client){
 });
 
 http.listen(PORT, function(){
-    console.log('listening on *:80',"color: green");
+    console.log('%c listening on *:80',"color: green");
 });
