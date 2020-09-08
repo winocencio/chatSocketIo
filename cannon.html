@@ -1,0 +1,128 @@
+<html>
+    <head>
+        <style>
+            #scoreboard{
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="/libs/jquery-1.11.1.js"></script>
+        <script src="/libs/raphael.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+
+            var userName = null;
+            while(!userName){
+                userName = prompt("Preencha seu nome:");
+                userName = userName != null ? userName.trim() : "";
+            }
+
+            var socketClient = io({ query: { name: userName } });
+            console.log("Conectado com o nome: " + userName);
+
+            var score = function(){
+                target.attr('fill', 'yellow');
+                socketClient.emit('meScore');
+                alert("Ponto!!");
+            }
+            var someoneScore = function(scoreboard){
+                var listaHtml = "";
+                console.log(scoreboard);
+
+                scoreboard.sort(function (a, b) {
+                    if (a.score < b.score) {
+                        return 1;
+                    }
+                    if (a.score > b.score) {
+                        return -1;
+                    }
+                    return 0;
+                });
+
+                scoreboard.forEach(function(e){
+                    listaHtml += "<li>"+ e.name + " : " + e.score + " pts </li>";
+                });
+                $('#scoreboard').html("");
+                $('#scoreboard').html("<ul>" + listaHtml + "</ul>");
+            }
+
+            socketClient.on('someoneScore',someoneScore);
+
+            var w = $(window).width()-250;
+            var h = $(window).height();
+            var draw = Raphael(0, 0, w, h);
+            var ox = 20;
+            var oy = h - 20;
+    
+            var field = draw.rect(-10, -h - 10, w + 20, 2 * h + 20);
+            field.attr({fill: 'lightgray'});
+            
+            var cannon = draw.rect(ox - 12, oy - 12, 50, 24);
+            cannon.attr({stroke: 'black', 'stroke-width': 3, fill: 'green'});
+            
+            var wall = draw.rect(w / 2 - 25, h / 2, 50, h / 2 - 8);
+            wall.attr({stroke: 'black', 'stroke-width': 3, fill: 'gray'});
+            
+            var target = draw.rect(w - 50, h - 50, 42, 42);
+            target.attr({stroke: 'black', 'stroke-width': 3, fill: 'red'});
+            
+            var ball = draw.circle(ox, oy, 10);
+            ball.attr({stroke: 'black', 'stroke-width': 3, fill: 'blue'});
+            
+            function inrect(r, ball) {
+            if (ball.attr('cx') + ball.attr('r') < r.attr('x') ||
+                ball.attr('cy') + ball.attr('r') < r.attr('y') ||
+                ball.attr('cx') - ball.attr('r') > r.attr('x') + r.attr('width') ||
+                ball.attr('cy') - ball.attr('r') > r.attr('y') + r.attr('height')) {
+                return false;
+            }
+            return true;
+            }
+            
+            $('body').mousemove(function(e) {
+            var dx = e.pageX - ox;
+            var dy = e.pageY - oy;
+            var angle = Math.atan2(dy, dx) / Math.PI * 180;
+            cannon.rotate(angle, ox, oy);
+            });
+            
+            var state = 'ready';
+            
+            $('body').click(function(e) {
+            if (state == 'ready') {
+                state = 'flying';
+                var vx = (e.pageX - ox) / 50;
+                var vy = (e.pageY - oy) / 50;
+                var x = ball.attr('cx');
+                var y = ball.attr('cy');
+                var advance = function() {
+                    x += vx;
+                    y += vy;
+                    vy += 0.1;
+                    ball.attr({cx: x, cy: y});
+                    if (!inrect(field, ball) || inrect(wall, ball) || inrect(target, ball)) {
+                        if (inrect(target, ball)) score();
+                        state = 'landed';
+                    } else {
+                        setTimeout(advance, 5);
+                    }
+                }
+                advance();
+            }
+            else if (state == 'landed') {
+                if (inrect(target, ball)) {
+                target.attr({x: w - 50 - Math.random() * (w / 3),
+                            y: h - 50 - Math.random() * (h / 2)});
+                target.attr('fill', 'red');
+                }
+                ball.attr({cx: ox, cy: oy});
+                state = 'ready';
+            }
+            });
+        </script>
+        <div id="scoreboard">
+        </div>
+    </body>
+    </html>
+    
