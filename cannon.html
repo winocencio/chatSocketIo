@@ -19,7 +19,7 @@
             }
 
             var socketClient = io({ query: { name: userName } });
-            console.log("Conectado com o nome: " + userName);
+            console.log("Conectado com o nome: " + userName+ "e id: " +socketClient);
 
             var score = function(){
                 target.attr('fill', 'yellow');
@@ -41,7 +41,7 @@
                 });
 
                 scoreboard.forEach(function(e){
-                    listaHtml += "<li>"+ e.name + " : " + e.score + " pts </li>";
+                    listaHtml += "<li>"+ e.id + " : " + e.score + " pts </li>";
                 });
                 $('#scoreboard').html("");
                 $('#scoreboard').html("<ul>" + listaHtml + "</ul>");

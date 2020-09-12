@@ -35,7 +35,7 @@
 
         /*Coneção Socket Server*/
         var socketClient = io({ query: { name: userName } });
-        escreverMensagem("Conectado com o nome: " + userName);
+        escreverMensagem("Conectado com o nome: " + userName + "e id: " +socketClient);
 
         /*Criando Eventos*/
         
